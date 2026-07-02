@@ -1,12 +1,15 @@
 package com.example.demo.Controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +24,9 @@ public class GeminiController {
 
     private final ChatClient chatClient;
     private final GeminiEmbeddingService geminiEmbeddingService;
+
+    @Autowired
+    private VectorStore vectorStore;
 
     // private final EmbeddingModel embeddingModel;
 
@@ -94,4 +100,11 @@ public class GeminiController {
         return dotProduct /
                 (Math.sqrt(norm1) * Math.sqrt(norm2));
     }
+
+    @PostMapping("api/product")
+    public List<Document> getProducts(@RequestParam String text) {
+
+        return vectorStore.similaritySearch(text);
+    }
+
 }
