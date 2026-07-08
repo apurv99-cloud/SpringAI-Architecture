@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
@@ -22,8 +23,10 @@ import com.example.demo.Services.GeminiEmbeddingService;
 
 public class GeminiController {
 
-    private final ChatClient chatClient;
-    private final GeminiEmbeddingService geminiEmbeddingService;
+    private ChatClient chatClient;
+    
+    @Autowired
+    private GeminiEmbeddingService geminiEmbeddingService;
 
     @Autowired
     private VectorStore vectorStore;
@@ -105,6 +108,16 @@ public class GeminiController {
     public List<Document> getProducts(@RequestParam String text) {
 
         return vectorStore.similaritySearch(text);
+    }
+
+    @PostMapping("/api/ask")
+    public String getAnswerUsingRag(@RequestParam String query) {
+
+        return chatClient.prompt(query)
+                .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+
+                .call()
+                .content();
     }
 
 }
